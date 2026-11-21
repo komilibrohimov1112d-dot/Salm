@@ -1,0 +1,6 @@
+{
+  "name": "71-Maktab",
+  "description": "71-sonli umumiy o'rta ta'lim maktabining rasmiy veb-sayti: maktab haqida batafsil ma'lumotlar, yangiliklar, YouTube kitoblar bo'limi va dars jadvali.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
