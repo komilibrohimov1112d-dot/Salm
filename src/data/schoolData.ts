@@ -30,7 +30,8 @@ export interface BookYouTubeEntry {
 }
 
 export const SCHOOL_IMAGES = {
-  heroCampus: '/src/assets/images/hero_school_71_1795239533288.jpg',
+  heroCampus: '/src/assets/images/hero_71_maktab_big_1795345417328.jpg',
+  heroCourtyard: '/src/assets/images/hero_school_71_1795239533288.jpg',
   library: '/src/assets/images/school_library_study_1795239514129.jpg',
   scienceLab: '/src/assets/images/news_science_olympiad_1795239514070.jpg',
   culturalEvent: '/src/assets/images/news_cultural_event_1795239512824.jpg',
@@ -42,9 +43,15 @@ export const SCHOOL_IMAGES = {
 export const HERO_SLIDES = [
   {
     image: SCHOOL_IMAGES.heroCampus,
-    alt: "Namangan shahridagi Suv xo'jaligi maktabining bosh binosi va hovlisi",
+    alt: "71-MAKTAB bosh binosi va markaziy kirish qismi — Namangan shahridagi Suv xo'jaligi maktabi",
     kicker: "Namangan shahri · Suv xo'jaligi hududi",
-    caption: "Maktab bosh binosi va ko'kalamzorlashtirilgan hovli",
+    caption: "71-Maktab bosh binosi va markaziy maydoni",
+  },
+  {
+    image: SCHOOL_IMAGES.heroCourtyard,
+    alt: "71-MAKTAB hovlisi va o'quv korpuslari",
+    kicker: "Namangan shahri · Suv xo'jaligi hududi",
+    caption: "Maktab hovlisi va ko'kalamzorlashtirilgan hudud",
   },
   {
     image: SCHOOL_IMAGES.library,
@@ -69,6 +76,63 @@ export const HERO_SLIDES = [
     alt: 'Maktabning yopiq sport majmuasi',
     kicker: 'Sog‘lom avlod · Sport va jismoniy tarbiya',
     caption: 'Basketbol va voleybol mashg‘ulotlari uchun yopiq sport zali',
+  },
+];
+
+export const SCHOOL_COLORFUL_INTRO = [
+  {
+    id: 'talim',
+    title: '1–11-sinflar chuqurlashtirilgan ta’lim',
+    subtitle: 'Asosiy o‘quv dasturi',
+    description:
+      '71-Maktabda boshlang‘ich va yuqori sinflar uchun matematika, fizika, ona tili va xorijiy tillar zamonaviy metodikalar asosida o‘qitiladi.',
+    cardStyle: 'bg-blue-950/70 border-blue-500/40 text-blue-100',
+    accentStyle: 'text-blue-400',
+  },
+  {
+    id: 'suv-xojaligi',
+    title: 'Namangan Suv xo‘jaligi hududi markazi',
+    subtitle: 'Tabiiy fanlar va ekologiya',
+    description:
+      'Namangan shahridagi Suv xo‘jaligi hududida joylashgan maktabimizda biologiya, kimyo va ekologiya fanlaridan amaliy laboratoriya darslari o‘tiladi.',
+    cardStyle: 'bg-emerald-950/70 border-emerald-500/40 text-emerald-100',
+    accentStyle: 'text-emerald-400',
+  },
+  {
+    id: 'it-robototexnika',
+    title: 'IT, dasturlash va robototexnika',
+    subtitle: 'Raqamli ko‘nikmalar',
+    description:
+      'Zamonaviy kompyuter sinflarida o‘quvchilar algoritmlash, dasturlash tillari va muhandislik asoslarini amaliy mashg‘ulotlarda o‘zlashtiradilar.',
+    cardStyle: 'bg-violet-950/70 border-violet-500/40 text-violet-100',
+    accentStyle: 'text-violet-400',
+  },
+  {
+    id: 'kutubxona',
+    title: '18 500+ kitob fondiga ega kutubxona',
+    subtitle: 'Mutolaa va bilim',
+    description:
+      'Maktab axborot-resurs markazida o‘zbek va jahon adabiyoti durdonalari, darsliklar hamda YouTube video darslari bilan bog‘langan qo‘llanmalar mavjud.',
+    cardStyle: 'bg-amber-950/65 border-amber-500/40 text-amber-100',
+    accentStyle: 'text-amber-400',
+  },
+  {
+    id: 'sport',
+    title: 'Sport majmuasi va sog‘lom hayot',
+    subtitle: 'Jismoniy tarbiya',
+    description:
+      'Yopiq sport zali, voleybol, basketbol, shaxmat hamda mini-futbol to‘garaklari dushanbadan shanbagacha muntazam ishlaydi.',
+    cardStyle: 'bg-rose-950/70 border-rose-500/40 text-rose-100',
+    accentStyle: 'text-rose-400',
+  },
+  {
+    id: 'yutuqlar',
+    title: 'Olimpiada g‘oliblari va 94% OTM natijasi',
+    subtitle: 'Yuqori natijalar',
+    description:
+      '84 nafar tajribali ustozlarimiz rahbarligida o‘quvchilarimiz shahar va respublika fan olimpiadalarida muntazam sovrinli o‘rinlarni egallamoqda.',
+    cardStyle: 'bg-cyan-950/70 border-cyan-500/40 text-cyan-100',
+    accentStyle: 'text-cyan-400',
   },
 ];
 
@@ -405,14 +469,3 @@ export const BOOK_YOUTUBE_CATALOG: BookYouTubeEntry[] = [
     ],
   },
 ];
-
-export const RASPISANIYA_DAYS = [
-  'Dushanba',
-  'Seshanba',
-  'Chorshanba',
-  'Payshanba',
-  'Juma',
-  'Shanba',
-] as const;
-
-export const RASPISANIYA_PERIODS = [1, 2, 3, 4, 5, 6] as const;

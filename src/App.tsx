@@ -1,15 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AboutSection } from './components/AboutSection';
-import { CodeGateModal } from './components/CodeGateModal';
+import { CodeGateModal, verifyPhoneCode } from './components/CodeGateModal';
 import { Footer } from './components/Footer';
 import { HeroSection } from './components/HeroSection';
 import { Navbar } from './components/Navbar';
 import { NewsSection } from './components/NewsSection';
 import { NomerModal } from './components/NomerModal';
-import { RaspisaniyaSection } from './components/RaspisaniyaSection';
+import { TopqirSection } from './components/TopqirSection';
 import { YouTubeSection } from './components/YouTubeSection';
 
-const PHONES_STORAGE_KEY = 'namangan_suv_xojaligi_phones_v1';
+interface SchoolStateResponse {
+  phones: {
+    reception: string;
+    director: string;
+  };
+  updatedAt: number;
+}
 
 const DEFAULT_PHONES = {
   reception: '+998 (69) 227-71-00',
@@ -18,28 +24,64 @@ const DEFAULT_PHONES = {
 
 export default function App() {
   const youtubeInputRef = useRef<HTMLInputElement | null>(null);
-  const [isNomerUnlocked, setIsNomerUnlocked] = useState(false);
+  const [schoolPhones, setSchoolPhones] = useState(DEFAULT_PHONES);
+  const [verifiedPhoneCode, setVerifiedPhoneCode] = useState<string | null>(null);
   const [nomerCodeModalOpen, setNomerCodeModalOpen] = useState(false);
-  const [nomerDetailsOpen, setNomerDetailsOpen] = useState(false);
-  const [schoolPhones, setSchoolPhones] = useState(() => {
-    try {
-      const saved = window.localStorage.getItem(PHONES_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved) as typeof DEFAULT_PHONES;
-      }
-    } catch {
-      // Ignore storage read errors
+  const [nomerEditModalOpen, setNomerEditModalOpen] = useState(false);
+  const [topqirSubjectsOpen, setTopqirSubjectsOpen] = useState(false);
+
+  const applyServerState = useCallback((data: Partial<SchoolStateResponse>) => {
+    if (data.phones?.reception && data.phones?.director) {
+      setSchoolPhones({
+        reception: data.phones.reception,
+        director: data.phones.director,
+      });
     }
-    return DEFAULT_PHONES;
-  });
+  }, []);
 
   useEffect(() => {
+    let active = true;
+
+    const fetchState = async () => {
+      try {
+        const res = await fetch('/api/school-state', { cache: 'no-store' });
+        if (res.ok && active) {
+          const data = (await res.json()) as SchoolStateResponse;
+          applyServerState(data);
+        }
+      } catch {
+        // Ignore transient network errors
+      }
+    };
+
+    void fetchState();
+
+    let eventSource: EventSource | null = null;
     try {
-      window.localStorage.setItem(PHONES_STORAGE_KEY, JSON.stringify(schoolPhones));
+      eventSource = new EventSource('/api/school-state/stream');
+      eventSource.onmessage = (event) => {
+        if (!active) return;
+        try {
+          const data = JSON.parse(event.data) as SchoolStateResponse;
+          applyServerState(data);
+        } catch {
+          // Ignore malformed SSE payload
+        }
+      };
     } catch {
-      // Ignore storage write errors
+      // Fallback handled by polling below
     }
-  }, [schoolPhones]);
+
+    const pollTimer = window.setInterval(() => {
+      void fetchState();
+    }, 15_000);
+
+    return () => {
+      active = false;
+      eventSource?.close();
+      window.clearInterval(pollTimer);
+    };
+  }, [applyServerState]);
 
   const handleYouTubeFocus = () => {
     window.setTimeout(() => {
@@ -47,59 +89,101 @@ export default function App() {
     }, 250);
   };
 
+  const handleTopqirClick = () => {
+    setTopqirSubjectsOpen(true);
+  };
+
   const handleNomerClick = () => {
-    if (isNomerUnlocked) {
-      setNomerDetailsOpen(true);
-    } else {
-      setNomerCodeModalOpen(true);
+    setVerifiedPhoneCode(null);
+    setNomerCodeModalOpen(true);
+  };
+
+  const handleVerifyPhoneCode = async (code: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/school-state/verify-phone-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { ok?: boolean };
+        return Boolean(data.ok);
+      }
+      return false;
+    } catch {
+      return verifyPhoneCode(code);
+    }
+  };
+
+  const handleSavePhones = async (next: { reception: string; director: string }): Promise<boolean> => {
+    if (!verifiedPhoneCode) return false;
+    try {
+      const res = await fetch('/api/school-state/phones', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: verifiedPhoneCode, phones: next }),
+      });
+      if (!res.ok) return false;
+      const data = (await res.json()) as SchoolStateResponse;
+      applyServerState(data);
+      return true;
+    } catch {
+      return false;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-zinc-900">
+    <div className="min-h-screen bg-[#090e1a] text-slate-100">
       <Navbar
         onYouTubeClick={handleYouTubeFocus}
+        onTopqirClick={handleTopqirClick}
         onNomerClick={handleNomerClick}
-        isNomerUnlocked={isNomerUnlocked}
       />
       <main>
         <HeroSection
           onNomerClick={handleNomerClick}
-          isNomerUnlocked={isNomerUnlocked}
+          onTopqirClick={handleTopqirClick}
+          schoolPhones={schoolPhones}
         />
         <AboutSection
           onNomerClick={handleNomerClick}
-          isNomerUnlocked={isNomerUnlocked}
           schoolPhones={schoolPhones}
         />
         <NewsSection />
         <YouTubeSection inputRef={youtubeInputRef} />
-        <RaspisaniyaSection />
+        <TopqirSection
+          isSubjectsOpen={topqirSubjectsOpen}
+          onToggleSubjects={(open) =>
+            setTopqirSubjectsOpen((prev) => (typeof open === 'boolean' ? open : !prev))
+          }
+        />
       </main>
       <Footer
         onNomerClick={handleNomerClick}
-        isNomerUnlocked={isNomerUnlocked}
         schoolPhones={schoolPhones}
       />
 
       <CodeGateModal
         isOpen={nomerCodeModalOpen}
-        title="Nomer bo‘limi himoyasi"
-        description="Maktab telefon raqamlarini ko‘rish uchun maxfiy kodni kiriting."
+        title="Nomerni o‘zgartirish"
+        description="Telefon raqamini tahrirlash uchun maxfiy kodni kiriting."
+        onVerify={handleVerifyPhoneCode}
         onClose={() => setNomerCodeModalOpen(false)}
-        onSuccess={() => {
-          setIsNomerUnlocked(true);
+        onSuccess={(code) => {
+          setVerifiedPhoneCode(code);
           setNomerCodeModalOpen(false);
-          setNomerDetailsOpen(true);
+          setNomerEditModalOpen(true);
         }}
       />
 
       <NomerModal
-        isOpen={nomerDetailsOpen}
+        isOpen={nomerEditModalOpen}
         phones={schoolPhones}
-        onSavePhones={setSchoolPhones}
-        onLock={() => setIsNomerUnlocked(false)}
-        onClose={() => setNomerDetailsOpen(false)}
+        onSavePhones={handleSavePhones}
+        onClose={() => {
+          setNomerEditModalOpen(false);
+          setVerifiedPhoneCode(null);
+        }}
       />
     </div>
   );

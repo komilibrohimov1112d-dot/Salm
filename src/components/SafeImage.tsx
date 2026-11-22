@@ -21,10 +21,10 @@ export function SafeImage({
       <div
         role="img"
         aria-label={alt}
-        className={`flex flex-col items-center justify-center bg-gradient-to-br from-stone-200 via-stone-100 to-stone-200 p-6 text-center text-stone-600 ${className}`}
+        className={`flex flex-col items-center justify-center bg-gradient-to-br from-[#0d1425] via-[#11192c] to-[#162038] p-6 text-center text-slate-300 ${className}`}
       >
-        <Building2 className="mb-2 h-8 w-8 text-stone-400" strokeWidth={1.5} />
-        <span className="font-serif text-sm font-medium text-stone-700">{fallbackTitle}</span>
+        <Building2 className="mb-2 h-8 w-8 text-slate-500" strokeWidth={1.5} />
+        <span className="font-serif text-sm font-medium text-slate-200">{fallbackTitle}</span>
       </div>
     );
   }
